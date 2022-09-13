@@ -6,7 +6,7 @@ import modules.processing as processing
 from modules.ui import plaintext_to_html
 
 
-def txt2img(prompt: str, negative_prompt: str, prompt_style: int, count_calls: int, steps: int, sampler_index: int, restore_faces: bool, tiling: bool, n_iter: int, batch_size: int, cfg_scale: float, seed: int, subseed: int, subseed_strength: float, seed_resize_from_h: int, seed_resize_from_w: int, height: int, width: int, *args):
+def txt2img(prompt: str, negative_prompt: str, prompt_style: str, count_calls: int, steps: int, sampler_index: int, restore_faces: bool, tiling: bool, n_iter: int, batch_size: int, cfg_scale: float, seed: int, subseed: int, subseed_strength: float, seed_resize_from_h: int, seed_resize_from_w: int, height: int, width: int, *args):
     if count_calls == 0 or count_calls == 1 or count_calls == None:
         p = StableDiffusionProcessingTxt2Img(
             sd_model=shared.sd_model,
@@ -38,9 +38,8 @@ def txt2img(prompt: str, negative_prompt: str, prompt_style: int, count_calls: i
             pass
         else:
             processed = process_images(p)
-
+        
         shared.total_tqdm.clear()
-
         return processed.images, processed.js(), plaintext_to_html(processed.info)
     else:
         result = []
