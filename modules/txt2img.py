@@ -6,39 +6,91 @@ import modules.processing as processing
 from modules.ui import plaintext_to_html
 
 
-def txt2img(prompt: str, negative_prompt: str, prompt_style: int, steps: int, sampler_index: int, restore_faces: bool, tiling: bool, n_iter: int, batch_size: int, cfg_scale: float, seed: int, subseed: int, subseed_strength: float, seed_resize_from_h: int, seed_resize_from_w: int, height: int, width: int, *args):
-    p = StableDiffusionProcessingTxt2Img(
-        sd_model=shared.sd_model,
-        outpath_samples=opts.outdir_samples or opts.outdir_txt2img_samples,
-        outpath_grids=opts.outdir_grids or opts.outdir_txt2img_grids,
-        prompt=prompt,
-        prompt_style=prompt_style,
-        negative_prompt=negative_prompt,
-        seed=seed,
-        subseed=subseed,
-        subseed_strength=subseed_strength,
-        seed_resize_from_h=seed_resize_from_h,
-        seed_resize_from_w=seed_resize_from_w,
-        sampler_index=sampler_index,
-        batch_size=batch_size,
-        n_iter=n_iter,
-        steps=steps,
-        cfg_scale=cfg_scale,
-        width=width,
-        height=height,
-        restore_faces=restore_faces,
-        tiling=tiling,
-    )
+def txt2img(prompt: str, negative_prompt: str, prompt_style: int, count_calls: int, steps: int, sampler_index: int, restore_faces: bool, tiling: bool, n_iter: int, batch_size: int, cfg_scale: float, seed: int, subseed: int, subseed_strength: float, seed_resize_from_h: int, seed_resize_from_w: int, height: int, width: int, *args):
+    if count_calls == 0 or count_calls == 1 or count_calls == None:
+        p = StableDiffusionProcessingTxt2Img(
+            sd_model=shared.sd_model,
+            outpath_samples=opts.outdir_samples or opts.outdir_txt2img_samples,
+            outpath_grids=opts.outdir_grids or opts.outdir_txt2img_grids,
+            prompt=prompt,
+            prompt_style=prompt_style,
+            negative_prompt=negative_prompt,
+            seed=seed,
+            subseed=subseed,
+            subseed_strength=subseed_strength,
+            seed_resize_from_h=seed_resize_from_h,
+            seed_resize_from_w=seed_resize_from_w,
+            sampler_index=sampler_index,
+            batch_size=batch_size,
+            n_iter=n_iter,
+            steps=steps,
+            cfg_scale=cfg_scale,
+            width=width,
+            height=height,
+            restore_faces=restore_faces,
+            tiling=tiling,
+        )
 
-    print(f"\ntxt2img: {prompt}", file=shared.progress_print_out)
-    processed = modules.scripts.scripts_txt2img.run(p, *args)
+        print(f"\ntxt2img: {prompt}", file=shared.progress_print_out)
+        processed = modules.scripts.scripts_txt2img.run(p, *args)
 
-    if processed is not None:
-        pass
+        if processed is not None:
+            pass
+        else:
+            processed = process_images(p)
+
+        shared.total_tqdm.clear()
+
+        return processed.images, processed.js(), plaintext_to_html(processed.info)
     else:
-        processed = process_images(p)
+        result = []
+        count_calls = int(count_calls)
 
-    shared.total_tqdm.clear()
+        for i in range(0, count_calls):
+            p = StableDiffusionProcessingTxt2Img(
+                sd_model=shared.sd_model,
+                outpath_samples=opts.outdir_samples or opts.outdir_txt2img_samples,
+                outpath_grids=opts.outdir_grids or opts.outdir_txt2img_grids,
+                prompt=prompt,
+                prompt_style=prompt_style,
+                negative_prompt=negative_prompt,
+                seed=seed,
+                subseed=subseed,
+                subseed_strength=subseed_strength,
+                seed_resize_from_h=seed_resize_from_h,
+                seed_resize_from_w=seed_resize_from_w,
+                sampler_index=sampler_index,
+                batch_size=batch_size,
+                n_iter=n_iter,
+                steps=steps,
+                cfg_scale=cfg_scale,
+                width=width,
+                height=height,
+                restore_faces=restore_faces,
+                tiling=tiling,
+            )
 
-    return processed.images, processed.js(), plaintext_to_html(processed.info)
+            print(f"\ntxt2img: {prompt}", file=shared.progress_print_out)
+            processed = modules.scripts.scripts_txt2img.run(p, *args)
+
+            if processed is not None:
+                pass
+            else:
+                processed = process_images(p)
+
+            shared.total_tqdm.clear()
+
+            result.append((processed.images, processed.js(), plaintext_to_html(processed.info)))
+
+        images = []
+        js = ''
+        html = ''
+        for k in result:
+            for j in k[0]:
+                images.append(j)
+            js = js + k[1]
+            html = html + k[2]
+        
+        return images, js, html
+        #return processed.images, processed.js(), plaintext_to_html(processed.info)
 

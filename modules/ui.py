@@ -247,6 +247,7 @@ def create_ui(txt2img, img2img, run_extras, run_pnginfo):
             txt2img_prompt = gr.Textbox(label="Prompt", elem_id="txt2img_prompt", show_label=False, placeholder="Prompt", lines=1)
             negative_prompt = gr.Textbox(label="Negative prompt", elem_id="txt2img_negative_prompt", show_label=False, placeholder="Negative prompt", lines=1, visible=cmd_opts.show_negative_prompt)
             txt2img_prompt_style = gr.Dropdown(label="Style", show_label=False, elem_id="style_index", choices=[k for k, v in shared.prompt_styles.items()], value=next(iter(shared.prompt_styles.keys())), visible=len(shared.prompt_styles) > 1)
+            count_calls = gr.Textbox(label="Count calls", elem_id="txt2img_count_calls", show_label=False, placeholder="Count calls", lines=1, value="1")
             roll = gr.Button('Roll', elem_id="txt2img_roll", visible=len(shared.artist_db.artists) > 0)
             submit = gr.Button('Generate', elem_id="txt2img_generate", variant='primary')
             check_progress = gr.Button('Check progress', elem_id="check_progress", visible=False)
@@ -304,6 +305,7 @@ def create_ui(txt2img, img2img, run_extras, run_pnginfo):
                     txt2img_prompt,
                     negative_prompt,
                     txt2img_prompt_style,
+                    count_calls,
                     steps,
                     sampler_index,
                     restore_faces,
